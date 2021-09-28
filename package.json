@@ -1,0 +1,17 @@
+{
+  "name": "bloomtest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "js/index.js",
+  "scripts": {
+    "start": "./server -r . -cert=cert.pem -key=key.pem -tls-port=8081 & ngrok start ar-card --region ap",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "postprocessing": "^6.23.0",
+    "three": "^0.132.2"
+  },
+  "devDependencies": {}
+}

@@ -13,17 +13,13 @@ const testPipelineModule = () => {
     group.visible = true;
     camera.add(group);
   };
-  const onStart = ({
-    canvas,
-    canvasWidth,
-    canvasHeight,
-    processGpuResult,
-    processCpuResult,
-  }) => {
+  const onStart = ({ canvas }) => {
     const { scene, camera, renderer } = XR8.Threejs.xrScene();
 
+    console.dir(canvas);
+
     group = new THREE.Object3D();
-    profilePhotoModule(group, renderer, camera, scene);
+    profilePhotoModule(group, renderer, camera, scene, canvas);
 
     initXrScene({ scene, camera, renderer }); // Add content to the scene and set starting camera position.
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -52,12 +48,7 @@ const testPipelineModule = () => {
     // XR8.Threejs.pipelineModule()'s onStart method.
     onStart,
     onUpdate: ({ canvas, processGpuResult, processCpuResult, GLctx }) => {},
-    onCanvasSizeChange: ({ canvasWidth, canvasHeight }) => {
-      const { camera, renderer } = XR8.Threejs.xrScene();
-      camera.aspect = innerWidth / innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(canvasWidth, canvasHeight);
-    },
+
     // Listeners are called right after the processing stage that fired them. This guarantees that
     // updates can be applied at an appropriate synchronized point in the rendering cycle.
     listeners: [

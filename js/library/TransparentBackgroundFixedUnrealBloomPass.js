@@ -156,10 +156,8 @@ class UnrealBloomPass extends THREE.Pass {
     for (let i = 0; i < this.nMips; i++) {
       this.renderTargetsHorizontal[i].setSize(resx, resy);
       this.renderTargetsVertical[i].setSize(resx, resy);
-      this.separableBlurMaterials[i].uniforms["texSize"].value = new Vector2(
-        resx,
-        resy
-      );
+      this.separableBlurMaterials[i].uniforms["texSize"].value =
+        new THREE.Vector2(resx, resy);
       resx = Math.round(resx / 2);
       resy = Math.round(resy / 2);
     }

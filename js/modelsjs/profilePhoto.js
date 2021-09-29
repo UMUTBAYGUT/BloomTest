@@ -17,7 +17,7 @@ const bloomPass = new UnrealBloomPass(
   1,
   0.1
 );
-const composer = new EffectComposer(renderer);
+const composer = new THREE.EffectComposer(renderer);
 
 const loader = new THREE.GLTFLoader(); // This comes from GLTFLoader.js.
 
@@ -37,7 +37,7 @@ function animate() {
 
 export const profilePhotoModule = (group, rendererOld, camera, scene) => {
   //Start Bloom Effect
-  const renderPass = new RenderPass(scene, camera);
+  const renderPass = new THREE.RenderPass(scene, camera);
   composer.addPass(renderPass);
   composer.addPass(bloomPass);
 

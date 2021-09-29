@@ -1,4 +1,24 @@
 // eslint-disable-next-line no-undef
+import { test1 as UnrealBloomPass } from "../library/TransparentBackgroundFixedUnrealBloomPass.js";
+//import { EffectComposer } from "https://cdn.jsdelivr.net/npm/three@0.132.2/examples/jsm/postprocessing/EffectComposer.js";
+console.log(UnrealBloomPass);
+
+//Start Imp To Bloom
+const canvReference = document.getElementById("camerafeed");
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvReference,
+  alpha: true,
+});
+renderer.setClearColor(0xff0000, 0);
+renderer.setSize(window.innerWidth, window.innerHeight);
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight),
+  4,
+  1,
+  0.1
+);
+const composer = new EffectComposer(renderer);
+
 const loader = new THREE.GLTFLoader(); // This comes from GLTFLoader.js.
 
 const clock = new THREE.Clock();
@@ -12,9 +32,15 @@ function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
   globalMixer.update(delta);
+  composer.render();
 }
 
-export const profilePhotoModule = (group, renderer, camera, scene) => {
+export const profilePhotoModule = (group, rendererOld, camera, scene) => {
+  //Start Bloom Effect
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+  composer.addPass(bloomPass);
+
   loader.load(
     profilePhotoModelFile,
 

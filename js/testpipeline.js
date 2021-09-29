@@ -121,7 +121,7 @@ const testPipelineModule = () => {
           cameraTexture
         );
       }
-      scene3.composer.render();
+      scene3.finalComposer.render();
     },
     xrScene,
     onUpdate: ({ canvas, processGpuResult, processCpuResult, GLctx }) => {
@@ -164,7 +164,7 @@ const testPipelineModule = () => {
         new Uint8Array(canvasWidth * canvasHeight * 3),
         canvasWidth,
         canvasHeight,
-        RGBFormat
+        THREE.RGBFormat
       );
       if (combinePass) {
         combinePass.uniforms["cameraTexture"] = { value: cameraTexture };
@@ -173,14 +173,14 @@ const testPipelineModule = () => {
       const { renderer } = scene3;
       renderer.setSize(canvasWidth, canvasHeight);
       // Limit high DPI screens to max of 2
-      const pixelRatio = MathUtils.clamp(window.devicePixelRatio, 1, 2);
+      const pixelRatio = THREE.MathUtils.clamp(window.devicePixelRatio, 1, 2);
       renderer.pixelRatio = pixelRatio;
       // Update render pass sizes
-      scene3.composer.setSize(
+      scene3.finalComposer.setSize(
         canvasWidth * pixelRatio,
         canvasHeight * pixelRatio
       );
-      scene3.composer.passes.forEach((pass) => {
+      scene3.finalComposer.passes.forEach((pass) => {
         if (pass.setSize) {
           pass.setSize(canvasWidth * pixelRatio, canvasHeight * pixelRatio);
         }

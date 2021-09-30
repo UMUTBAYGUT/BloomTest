@@ -19,10 +19,11 @@ function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
   globalMixer.update(delta);
-  const darkMaterial = new THREE.MeshBasicMaterial({ color: "black" });
+  /*const darkMaterial = new THREE.MeshBasicMaterial({ color: "black" });
   let count = 1;
+  //console.log("test :", profilePhotoModel);
   profilePhotoModel.traverse((obj) => {
-    if (obj.isMesh && obj.name !== "buttonUP_rotating") {
+    if (obj.isMesh && obj.name !== "buttonUP_rotatingumut") {
       materials[obj.uuid] = obj.material;
       obj.material = darkMaterial;
     }
@@ -40,7 +41,7 @@ function animate() {
     }
   });
 
-  _final.render();
+  _final.render();*/
 }
 
 export const profilePhotoModule = (group, bloom, final) => {

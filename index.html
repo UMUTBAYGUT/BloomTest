@@ -65,6 +65,7 @@
       
         gl_FragColor = normalBlend(cameraColor, sceneColor, sceneColor.a);
         gl_FragColor += bloomColor;
+        // gl_FragColor += bloomColor;
         // gl_FragColor = vec4(length(cameraColor.rgb), length(bloomColor.rgb), length(sceneColor.rgb), 1.); // Shows camera in red and scene in blue
       }
 		</script>

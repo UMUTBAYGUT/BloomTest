@@ -12,6 +12,8 @@ const bloomPipelineModule = () => {
   let sceneTarget;
   let copyPass;
 
+  let width,height;
+
   console.log(document.getElementById);
   const combineShaderFrag = document.getElementById("fragmentshader").textContent;
   const combineShaderVert = document.getElementById("vertexshader").textContent;
@@ -34,6 +36,10 @@ const bloomPipelineModule = () => {
       return
     }
     isSetup = true;
+
+    width = canvasWidth;
+    height = canvasHeight;
+
     const scene = new Scene();
     scene.name = 'Root Scene';
     const camera = new PerspectiveCamera(
@@ -51,14 +57,15 @@ const bloomPipelineModule = () => {
       antialias: true,
     });
     renderer.debug.checkShaderErrors = true;
+    renderer.setScissorTest(true);
     renderer.autoClear = false;
     renderer.autoClearDepth = false;
     renderer.setClearColor(0xffffff, 0);
-    renderer.toneMapping = ReinhardToneMapping;
-    renderer.toneMappingExposure = 2.3;
     renderer.setSize(canvasWidth, canvasHeight)
 
-    sceneTarget = new WebGLRenderTarget(canvasWidth, canvasHeight, { generateMipmaps: false });
+    sceneTarget = new WebGLRenderTarget(canvasWidth, canvasHeight, { 
+      generateMipmaps: false,
+    });
 
     // Bloom Composer
     const bloomComposer = new EffectComposer(renderer);
@@ -71,7 +78,7 @@ const bloomPipelineModule = () => {
     // Bloom Pass
     bloomPass = new UnrealBloomPass(new Vector2(canvasWidth, canvasHeight), 2.2, 0, 0);
     bloomPass.clearColor = new Color(0xffffff);
-    bloomPass.threshold = 0;
+    bloomPass.threshold = 0.5;
     bloomComposer.addPass(bloomPass);
 
     const gui = new dat.GUI({ autoPlace: true });
@@ -99,6 +106,19 @@ const bloomPipelineModule = () => {
     // Overwrite the default threejs getter in 8thwall so that you can get the bloomComposer component as well
     window.XR8.Threejs.xrScene = xrScene;
   }
+
+  // WARN: REMOVE ME
+  var mx = 0;
+  var my = 0;
+      
+  document.addEventListener('mousemove', onMouseUpdate, false);
+  document.addEventListener('mouseenter', onMouseUpdate, false);
+      
+  function onMouseUpdate(e) {
+    mx = e.pageX;
+    my = e.pageY;
+  }
+  // END WARN: REMOVE ME
 
   return {
     name: 'customthreejs',
@@ -178,6 +198,14 @@ const bloomPipelineModule = () => {
       scene3.renderer.setRenderTarget(null);
       scene3.bloomComposer.render();
       scene3.composer.render();
+      
+      // WARN: Delete me
+      const { x, y } = scene3.renderer.getSize();
+      scene3.renderer.setScissor(0, 0, mx, y);
+      scene3.renderer.clear();
+      scene3.renderer.render(scene3.scene, scene3.camera);
+      scene3.renderer.setScissor(0, 0, x, y);
+      // END WARN: Delte me
     },
     // Get a handle to the xr scene, camera and renderer. Returns:
     // {

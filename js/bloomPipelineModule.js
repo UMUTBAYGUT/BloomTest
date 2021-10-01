@@ -105,9 +105,9 @@ const bloomPipelineModule = () => {
 
     const gui = new dat.GUI({ autoPlace: true });
     gui.add(bloomPass, "threshold", 0, 1, 0.01);
-    gui.add(bloomPass, "strength", 0, 3, 0.01);
+    gui.add(bloomPass, "strength", 0, 10, 0.01);
     gui.add(bloomPass, "radius", 0, 3, 0.01);
-    gui.add(renderer, "toneMappingExposure", 0, 5, 0.01);
+    gui.add(renderer, "toneMappingExposure", 0, 15, 0.01);
     gui.domElement.style.zIndex = "9999";
     gui.domElement.id = "gui";
     console.log(gui);

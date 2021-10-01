@@ -8,4 +8,7 @@ body {
     height: 100%;
     margin: -1px 0px 0px 0px !important;
     padding: 0;
+    background-color: black !important;
 }
+
+#gui { position: absolute; top: 2px; left: 2px }

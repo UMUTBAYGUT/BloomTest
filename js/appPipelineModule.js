@@ -12,7 +12,11 @@ const appPipelineModule = () => {
     // XR8.Threejs scene to be ready before we can access it to add content. It was created in
     // XR8.Threejs.pipelineModule()'s onStart method.
     onStart: (args) => {
-      const { scene: _scene, camera: _camera, renderer: _renderer} = window.XR8.Threejs.xrScene();
+      const {
+        scene: _scene,
+        camera: _camera,
+        renderer: _renderer,
+      } = window.XR8.Threejs.xrScene();
       scene = _scene;
       camera = _camera;
       renderer = _renderer;
@@ -48,17 +52,16 @@ const appPipelineModule = () => {
         const animation = gltf.animations[0];
         const action = mixer.clipAction(animation);
 
-
         action.play();
 
         model.position.set(0, 0, -5);
         model.rotation.copy({ _x: 0, _y: 0, _z: 0, _order: "XYZ" });
         model.visible = true;
+        window.GltfModel = model;
         camera.add(model);
       });
     },
-    onDetach: () => {
-    },
+    onDetach: () => {},
     onUpdate: ({ processCpuResult }) => {
       const delta = clock.getDelta();
       if (mixer) mixer.update(delta);

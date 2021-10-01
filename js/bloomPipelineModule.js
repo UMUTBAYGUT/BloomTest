@@ -1,10 +1,26 @@
-const {Scene, PerspectiveCamera, WebGLRenderer, Vector2, MathUtils, DataTexture, RGBFormat, Color, WebGLRenderTarget, ReinhardToneMapping, ShaderPass, TexturePass, EffectComposer} = THREE;
-import { UnrealBloomPass } from './AlphaUnrealBloomPass.js';
+const {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  Vector2,
+  MathUtils,
+  DataTexture,
+  RGBFormat,
+  Color,
+  WebGLRenderTarget,
+  ReinhardToneMapping,
+  ShaderPass,
+  TexturePass,
+  EffectComposer,
+} = THREE;
+import { UnrealBloomPass } from "./AlphaUnrealBloomPass.js";
+const materials = {};
+let camera;
+let isUploadModal = false;
 
 const bloomPipelineModule = () => {
-
   let scene3;
-  let isSetup = false
+  let isSetup = false;
   let combinePass;
   let bloomPass;
   const cameraTextureCopyPosition = new Vector2(0, 0);
@@ -12,10 +28,11 @@ const bloomPipelineModule = () => {
   let sceneTarget;
   let copyPass;
 
-  let width,height;
+  let width, height;
 
   console.log(document.getElementById);
-  const combineShaderFrag = document.getElementById("fragmentshader").textContent;
+  const combineShaderFrag =
+    document.getElementById("fragmentshader").textContent;
   const combineShaderVert = document.getElementById("vertexshader").textContent;
   const combineShader = {
     uniforms: {
@@ -23,17 +40,17 @@ const bloomPipelineModule = () => {
       tDiffuse: { value: null },
       useAdditiveBlend: { value: false },
     },
-    fragmentShader: combineShaderFrag, 
+    fragmentShader: combineShaderFrag,
     vertexShader: combineShaderVert,
-  }
+  };
 
   const xrScene = () => {
     return scene3;
-  }
+  };
 
-  const trySetup = ({canvas, canvasWidth, canvasHeight, GLctx}) => {
+  const trySetup = ({ canvas, canvasWidth, canvasHeight, GLctx }) => {
     if (isSetup) {
-      return
+      return;
     }
     isSetup = true;
 
@@ -41,14 +58,14 @@ const bloomPipelineModule = () => {
     height = canvasHeight;
 
     const scene = new Scene();
-    scene.name = 'Root Scene';
-    const camera = new PerspectiveCamera(
-      60.0, /* initial field of view; will get set based on device info later. */
+    scene.name = "Root Scene";
+    camera = new PerspectiveCamera(
+      60.0 /* initial field of view; will get set based on device info later. */,
       canvasWidth / canvasHeight,
       0.01,
-      1000,
-    )
-    scene.add(camera)
+      1000
+    );
+    scene.add(camera);
 
     const renderer = new WebGLRenderer({
       canvas,
@@ -61,9 +78,9 @@ const bloomPipelineModule = () => {
     renderer.autoClear = false;
     renderer.autoClearDepth = false;
     renderer.setClearColor(0xffffff, 0);
-    renderer.setSize(canvasWidth, canvasHeight)
+    renderer.setSize(canvasWidth, canvasHeight);
 
-    sceneTarget = new WebGLRenderTarget(canvasWidth, canvasHeight, { 
+    sceneTarget = new WebGLRenderTarget(canvasWidth, canvasHeight, {
       generateMipmaps: false,
     });
 
@@ -71,14 +88,19 @@ const bloomPipelineModule = () => {
     const bloomComposer = new EffectComposer(renderer);
     bloomComposer.renderToScreen = false;
 
-    // Copy scene into bloom 
+    // Copy scene into bloom
     copyPass = new TexturePass(sceneTarget.texture);
     bloomComposer.addPass(copyPass);
 
     // Bloom Pass
-    bloomPass = new UnrealBloomPass(new Vector2(canvasWidth, canvasHeight), 2.2, 0, 0);
+    bloomPass = new UnrealBloomPass(
+      new Vector2(canvasWidth, canvasHeight),
+      2.2,
+      0,
+      0
+    );
     bloomPass.clearColor = new Color(0xffffff);
-    bloomPass.threshold = 0.5;
+    bloomPass.threshold = 0.92;
     bloomComposer.addPass(bloomPass);
 
     const gui = new dat.GUI({ autoPlace: true });
@@ -87,33 +109,33 @@ const bloomPipelineModule = () => {
     gui.add(bloomPass, "radius", 0, 3, 0.01);
     gui.add(renderer, "toneMappingExposure", 0, 5, 0.01);
     gui.domElement.style.zIndex = "9999";
+    gui.domElement.id = "gui";
     console.log(gui);
 
-
     // Final composer
-    const composer = new EffectComposer( renderer );
+    const composer = new EffectComposer(renderer);
     composer.addPass(copyPass);
 
     // Combine scene and camerafeed pass
-    combinePass = new ShaderPass(combineShader)
+    combinePass = new ShaderPass(combineShader);
     combinePass.clear = false;
     combinePass.renderToScreen = true;
     composer.addPass(combinePass);
-
-    scene3 = { scene, camera, renderer, bloomComposer, composer }
+    scene.add(new THREE.AmbientLight(0x404040, 3));
+    scene3 = { scene, camera, renderer, bloomComposer, composer };
     // @ts-expect-error no type definition
     window.scene3 = scene3;
     // Overwrite the default threejs getter in 8thwall so that you can get the bloomComposer component as well
     window.XR8.Threejs.xrScene = xrScene;
-  }
+  };
 
   // WARN: REMOVE ME
   var mx = 0;
   var my = 0;
-      
-  document.addEventListener('mousemove', onMouseUpdate, false);
-  document.addEventListener('mouseenter', onMouseUpdate, false);
-      
+
+  document.addEventListener("mousemove", onMouseUpdate, false);
+  document.addEventListener("mouseenter", onMouseUpdate, false);
+
   function onMouseUpdate(e) {
     mx = e.pageX;
     my = e.pageY;
@@ -121,21 +143,24 @@ const bloomPipelineModule = () => {
   // END WARN: REMOVE ME
 
   return {
-    name: 'customthreejs',
+    name: "customthreejs",
     onStart: (args) => trySetup(args),
-    onDetach: () => { isSetup = false },
-    onUpdate: ({processCpuResult}) => {
-      const realitySource = processCpuResult.reality || processCpuResult.facecontroller
+    onDetach: () => {
+      isSetup = false;
+    },
+    onUpdate: ({ processCpuResult }) => {
+      const realitySource =
+        processCpuResult.reality || processCpuResult.facecontroller;
 
       if (!realitySource) {
-        return
+        return;
       }
 
-      const {rotation, position, intrinsics} = realitySource
-      const {camera} = scene3
+      const { rotation, position, intrinsics } = realitySource;
+      const { camera } = scene3;
 
       for (let i = 0; i < 16; i++) {
-        camera.projectionMatrix.elements[i] = intrinsics[i]
+        camera.projectionMatrix.elements[i] = intrinsics[i];
       }
 
       // Fix for broken raycasting in r103 and higher. Related to:
@@ -143,51 +168,75 @@ const bloomPipelineModule = () => {
       // Note: camera.projectionMatrixInverse wasn't introduced until r96 so check before setting
       // the inverse
       if (camera.projectionMatrixInverse) {
-        camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert()
+        camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
       }
 
       if (rotation) {
-        camera.setRotationFromQuaternion(rotation)
+        camera.setRotationFromQuaternion(rotation);
       }
       if (position) {
-        camera.position.set(position.x, position.y, position.z)
+        camera.position.set(position.x, position.y, position.z);
       }
     },
-    onCanvasSizeChange: ({canvasWidth, canvasHeight, videoWidth, videoHeight}) => {
+    onCanvasSizeChange: ({
+      canvasWidth,
+      canvasHeight,
+      videoWidth,
+      videoHeight,
+    }) => {
       if (!isSetup) {
-        return
+        return;
       }
-      cameraTexture = new DataTexture(new Uint8Array(canvasWidth * canvasHeight * 3), canvasWidth, canvasHeight, RGBFormat);
+      cameraTexture = new DataTexture(
+        new Uint8Array(canvasWidth * canvasHeight * 3),
+        canvasWidth,
+        canvasHeight,
+        RGBFormat
+      );
 
-      const {renderer} = scene3
-      renderer.setSize(canvasWidth, canvasHeight)
+      const { renderer } = scene3;
+      renderer.setSize(canvasWidth, canvasHeight);
       const pixelRatio = MathUtils.clamp(window.devicePixelRatio, 1, 2);
       renderer.pixelRatio = pixelRatio;
       //
       // Update render pass sizes
-      scene3.bloomComposer.setSize(canvasWidth * pixelRatio, canvasHeight * pixelRatio);
-      scene3.bloomComposer.passes.forEach(pass => {
+      scene3.bloomComposer.setSize(
+        canvasWidth * pixelRatio,
+        canvasHeight * pixelRatio
+      );
+      scene3.bloomComposer.passes.forEach((pass) => {
         if (pass.setSize) {
           pass.setSize(canvasWidth * pixelRatio, canvasHeight * pixelRatio);
         }
-      })
-      scene3.composer.setSize(canvasWidth * pixelRatio, canvasHeight * pixelRatio);
-      scene3.composer.passes.forEach(pass => {
+      });
+      scene3.composer.setSize(
+        canvasWidth * pixelRatio,
+        canvasHeight * pixelRatio
+      );
+      scene3.composer.passes.forEach((pass) => {
         if (pass.setSize) {
           pass.setSize(canvasWidth * pixelRatio, canvasHeight * pixelRatio);
         }
-      })
+      });
       if (bloomPass && combinePass && sceneTarget && copyPass) {
-        combinePass.uniforms['cameraTexture'] = { value: cameraTexture };
-        combinePass.uniforms.bloomTexture = { value: bloomPass.renderTargetsHorizontal[0] };
-        sceneTarget.setSize(canvasWidth * pixelRatio, canvasHeight * pixelRatio);
-        copyPass.uniforms['tDiffuse'] = { value: sceneTarget.texture };
+        combinePass.uniforms["cameraTexture"] = { value: cameraTexture };
+        combinePass.uniforms.bloomTexture = {
+          value: bloomPass.renderTargetsHorizontal[0],
+        };
+        sceneTarget.setSize(
+          canvasWidth * pixelRatio,
+          canvasHeight * pixelRatio
+        );
+        copyPass.uniforms["tDiffuse"] = { value: sceneTarget.texture };
       }
     },
     onRender: () => {
       // renderer.render(scene, camera)
       if (cameraTexture) {
-        scene3.renderer.copyFramebufferToTexture(cameraTextureCopyPosition, cameraTexture)
+        scene3.renderer.copyFramebufferToTexture(
+          cameraTextureCopyPosition,
+          cameraTexture
+        );
       }
       if (sceneTarget) {
         scene3.renderer.setRenderTarget(sceneTarget);
@@ -196,9 +245,40 @@ const bloomPipelineModule = () => {
       scene3.renderer.clearDepth();
       scene3.renderer.render(scene3.scene, scene3.camera);
       scene3.renderer.setRenderTarget(null);
-      scene3.bloomComposer.render();
-      scene3.composer.render();
-      
+      //  scene3.bloomComposer.render();
+      var model = window.GltfModel;
+      if (model) {
+        if (!isUploadModal) {
+          camera.add(model);
+          isUploadModal = true;
+        }
+        const darkMaterial = new THREE.MeshBasicMaterial({ color: "black" });
+        let count = 1;
+
+        model.traverse((obj) => {
+          if (obj.isMesh && obj.name !== "buttonUP_rotating") {
+            materials[obj.uuid] = obj.material;
+            obj.material = darkMaterial;
+          }
+          count++;
+        });
+
+        scene3.bloomComposer.render();
+
+        model.traverse((obj) => {
+          if (obj.isMesh) {
+            if (materials[obj.uuid]) {
+              obj.material = materials[obj.uuid];
+              delete materials[obj.uuid];
+            }
+          }
+        });
+        scene3.composer.render();
+      } else {
+        console.log("yok");
+      }
+      // scene3.composer.render();
+
       // WARN: Delete me
       const { x, y } = scene3.renderer.getSize();
       scene3.renderer.setScissor(0, 0, mx, y);
@@ -214,7 +294,7 @@ const bloomPipelineModule = () => {
     //   renderer: The Threejs renderer.
     // }
     xrScene,
-  }
-}
+  };
+};
 
 export default bloomPipelineModule;
